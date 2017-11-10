@@ -1,3 +1,7 @@
+
+# 常用的参数处理方式
+
+```
 help="$0  -a -b"
 if [ $# == 0 ]; then
     echo $help
@@ -20,3 +24,5 @@ do
                 ;;
         esac
 done
+
+```
