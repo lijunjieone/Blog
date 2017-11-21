@@ -106,3 +106,63 @@ public class RePluginClassLoader extends PathClassLoader{
 
 
 ```
+
+
+# hook 系统的classloader
+- 建立自己的classloader
+- 设置线程classloader
+- 设置包的初始classloader
+
+```
+public static boolean patch(Application application) {
+    try {
+        // 获取Application的BaseContext
+        // 该BaseContext在不同版本中具体的实例不同
+        // 1. ApplicationContext - Android 2.1
+        // 2. ContextImpl - Android 2.2 and higher
+        // 3. AppContextImpl - Android 2.2 and higher
+
+        Context oBase = application.getBaseContext();
+        if (oBase == null) {
+
+            return false;
+        }
+
+        // 获取mBase.mPackageInfo
+        // mPackageInfo的类型主要有两种：mPackageInfo这个对象代表了apk文件在内存中的表现
+        // 1. android.app.ActivityThread$PackageInfo - Android 2.1 - 2.3
+        // 2. android.app.LoadedApk - Android 2.3.3 and higher
+        Object oPackageInfo = ReflectUtils.readField(oBase, "mPackageInfo");
+        if (oPackageInfo == null) {
+
+            return false;
+        }
+
+
+       // 获取mPackageInfo.mClassLoader，也就是宿主的PathClassLoader对象
+        ClassLoader oClassLoader = (ClassLoader) ReflectUtils.readField(oPackageInfo, "mClassLoader");
+        if (oClassLoader == null) {
+            if (LOGR) {
+                LogRelease.e(PLUGIN_TAG, "pclu.p: nf mpi. mb cl=" + oBase.getClass() + "; mpi cl=" + oPackageInfo.getClass());
+            }
+            return false;
+        }
+
+        // 从RePluginCallbacks中获取RePluginClassLoader，通过宿主的父ClassLoader和宿主ClassLoader生成RePluginClassLoader
+        ClassLoader cl = RePlugin.getConfig().getCallbacks().createClassLoader(oClassLoader.getParent(), oClassLoader);
+
+        // 将我们创建的RePluginClassLoader赋值给mPackageInfo.mClassLoader ，来达到代理系统的PathClassLoader
+        ReflectUtils.writeField(oPackageInfo, "mClassLoader", cl);
+
+        // 设置线程上下文中的ClassLoader为RePluginClassLoader
+        // 防止在个别Java库用到了Thread.currentThread().getContextClassLoader()时，“用了原来的PathClassLoader”，或为空指针
+        Thread.currentThread().setContextClassLoader(cl);
+
+    } catch (Throwable e) {
+        e.printStackTrace();
+        return false;
+    }
+    return true;
+}
+
+```
