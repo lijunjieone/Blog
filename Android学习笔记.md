@@ -1,3 +1,9 @@
+# WebView 使用笔记
+  - webview 设置
+  - 两个回调类
+  - js和native的调用
+  - webview漏洞
+  
 # TargetSdkVersion的实现原理
    
    在Android新版本实现某些功能时,如果需要兼容以前版本,获取TargetSdkVersion,然后根据该值来觉得是否使用新的方案,还是旧的实现方案.
