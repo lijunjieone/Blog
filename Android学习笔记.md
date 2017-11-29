@@ -4,7 +4,9 @@
 - 两个回调类
 - js和native的调用
 - webview漏洞
-  
+
+## 参考
+[android WebView详解，常见漏洞详解和安全源码](http://www.cnblogs.com/laughingQing/p/6392455.html)
 # TargetSdkVersion的实现原理
    
    在Android新版本实现某些功能时,如果需要兼容以前版本,获取TargetSdkVersion,然后根据该值来觉得是否使用新的方案,还是旧的实现方案.
